@@ -18,7 +18,7 @@ type (
 		JumlahCicilan float64        `gorm:"not null" json:"jumlah_cicilan"`
 		JumlahBunga   float64        `gorm:"not null" json:"jumlah_bunga"`
 		NamaAsset     string         `gorm:"not null" json:"nama_asset"`
-		Customer      Customer       `gorm:"references:ID"`
-		CustomerID    uint           `gorm:"not null" json:"customer_id"`
+		UserDetail    UserDetail     `gorm:"references:ID"`
+		UserID        uint           `gorm:"not null" json:"userDetail_id"`
 	}
 )

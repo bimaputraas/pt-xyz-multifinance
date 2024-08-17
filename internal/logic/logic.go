@@ -20,9 +20,10 @@ type (
 )
 
 const (
-	ErrInvalidArgument = 1
-	ErrNotFound        = 2
-	ErrInternal        = 3
+	InvalidArgument = 1
+	NotFound        = 2
+	Internal        = 3
+	Ilegal          = 4
 )
 
 func New() (*Logic, error) {
@@ -38,16 +39,20 @@ func ParseError(err error) (Error, bool) {
 	return r, true
 }
 
-func InvalidArgument(msg string) error {
-	return &errLogic{code: ErrInvalidArgument, msg: msg}
+func ErrInvalidArgument(err error) error {
+	return &errLogic{code: InvalidArgument, msg: err.Error()}
 }
 
-func NotFound(msg string) error {
-	return &errLogic{code: ErrNotFound, msg: msg}
+func ErrNotFound(err error) error {
+	return &errLogic{code: NotFound, msg: err.Error()}
 }
 
-func Internal(msg string) error {
-	return &errLogic{code: ErrInternal, msg: msg}
+func ErrInternal(err error) error {
+	return &errLogic{code: Internal, msg: err.Error()}
+}
+
+func ErrIllegal(err error) error {
+	return &errLogic{code: Internal, msg: err.Error()}
 }
 
 func (e *errLogic) Code() int {

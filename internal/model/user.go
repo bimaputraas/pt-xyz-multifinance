@@ -12,11 +12,11 @@ type (
 		CreatedAt time.Time      `json:"created_at,omitempty"`
 		UpdatedAt time.Time      `json:"updated_at,omitempty"`
 		DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
-		Email     string         `gorm:"unique;not null" json:"email,omitempty" validate:"required"`
+		Email     string         `gorm:"unique;not null" json:"email,omitempty" validate:"required,email"`
 		Password  string         `gorm:"not null" json:"password,omitempty" validate:"required"`
 	}
 
-	Customer struct {
+	UserDetail struct {
 		ID           uint           `gorm:"primaryKey" json:"id,omitempty"`
 		CreatedAt    time.Time      `json:"created_at,omitempty"`
 		UpdatedAt    time.Time      `json:"updated_at,omitempty"`
@@ -29,22 +29,23 @@ type (
 		Gaji         float64        `gorm:"not null" json:"gaji" validate:"required"`
 		FotoKTP      string         `gorm:"not null" json:"foto_ktp" validate:"required"`
 		FotoSelfie   string         `gorm:"not null" json:"foto_selfie" validate:"required"`
+		IsVerified   bool           `json:"omitempty"`
 		User         User           `gorm:"references:ID"`
 		UserID       uint           `gorm:"not null" json:"user_id"`
 	}
 
-	CustomerLimit struct {
-		ID         uint           `gorm:"primaryKey" json:"id,omitempty"`
-		CustomerID uint           `gorm:"not null" json:"konsumen_id"`
-		Tenor1     float64        `json:"tenor_1"`
-		Tenor2     float64        `json:"tenor_2"`
-		Tenor3     float64        `json:"tenor_3"`
-		Tenor4     float64        `json:"tenor_4"`
-		CreatedAt  time.Time      `json:"created_at,omitempty"`
-		UpdatedAt  time.Time      `json:"updated_at,omitempty"`
-		DeletedAt  gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
+	UserLimit struct {
+		ID        uint           `gorm:"primaryKey" json:"id,omitempty"`
+		UserID    uint           `gorm:"not null" json:"konsumen_id"`
+		Tenor1    float64        `json:"tenor_1"`
+		Tenor2    float64        `json:"tenor_2"`
+		Tenor3    float64        `json:"tenor_3"`
+		Tenor4    float64        `json:"tenor_4"`
+		CreatedAt time.Time      `json:"created_at,omitempty"`
+		UpdatedAt time.Time      `json:"updated_at,omitempty"`
+		DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 
-		Customer Customer `gorm:"foreignKey:CustomerID" json:"konsumen,omitempty"`
+		UserDetail UserDetail `gorm:"foreignKey:UserID" json:"konsumen,omitempty"`
 	}
 )
 

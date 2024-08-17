@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func New(middleware *middleware.Middleware, logic *logic.Logic) {
+func New(middleware *middleware.Middleware, logic *logic.Logic) *gin.Engine {
 	router := gin.Default()
 
 	router.SetTrustedProxies(nil)
@@ -18,5 +18,5 @@ func New(middleware *middleware.Middleware, logic *logic.Logic) {
 	v1.GET("user/login")
 	v1.PUT("transaction")
 
-	router.Run(":8888")
+	return router
 }

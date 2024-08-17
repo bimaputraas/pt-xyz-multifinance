@@ -1,8 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"xyz-multifinance/pkg"
+)
+
+type User struct {
+	Email string `validate:"required,email"`
+}
 
 func main() {
-	fmt.Println("Hello World")
+	pkg.ValidateStruct(User{Email: "ss"})
 
 }

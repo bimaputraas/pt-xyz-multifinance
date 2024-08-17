@@ -6,23 +6,27 @@ import (
 
 type (
 	Repository struct {
-		CustomerRepository
 		UserRepository
+		UserDetailRepository
 		TransactionRepository
-		CustomerLimitRepository
+		UserLimitRepository
 	}
 
-	CustomerRepository interface {
-		FindCustomerById(id int) (model.Customer, error, bool)
-		FindAllCustomers() ([]model.Customer, error)
-		CreateCustomer(model.Customer) error
-		UpdateCustomerById(id int, update model.Customer) (error, bool)
-	}
 	UserRepository interface {
 		FindUserById(id int) (model.User, error, bool)
 		FindAllUsers() ([]model.User, error)
 		CreateUser(model.User) error
-		UpdateUserById(id int, update model.User) (error, bool)
+		FindUserByEmail(email string) (model.User, error, bool)
+	}
+	UserDetailRepository interface {
+		FindUserDetailByUId(userId int) (model.UserDetail, error, bool)
+		CreateUserDetail(model.UserDetail) error
+	}
+
+	UserLimitRepository interface {
+		FindUserLimitByUId(userId int) (model.UserLimit, error, bool)
+		CreateUserLimit(model.UserLimit) error
+		UpdateUserLimitByUId(userId int, update model.UserLimit) (error, bool)
 	}
 	TransactionRepository interface {
 		FindTransactionById(id int) (model.Transaction, error, bool)
@@ -30,14 +34,8 @@ type (
 		CreateTransaction(model.Transaction) error
 		UpdateTransactionById(id int, update model.Transaction) (error, bool)
 	}
-	CustomerLimitRepository interface {
-		FindCustomerLimitById(id int) (model.CustomerLimit, error, bool)
-		FindAllCustomerLimits() ([]model.CustomerLimit, error)
-		CreateCustomerLimit(model.CustomerLimit) error
-		UpdateCustomerLimitById(id int, update model.CustomerLimit) (error, bool)
-	}
 )
 
-func New(UserRepository, CustomerRepository, TransactionRepository, CustomerLimitRepository) (*Repository, error) {
+func New(UserRepository, UserRepository, TransactionRepository, UserLimitRepository) (*Repository, error) {
 	return &Repository{}, nil
 }
