@@ -31,11 +31,11 @@ type (
 	TransactionRepository interface {
 		FindTransactionById(id int) (model.Transaction, error, bool)
 		FindAllTransactions() ([]model.Transaction, error)
-		CreateTransaction(model.Transaction) error
+		CreateTransaction(model.UserLimit, model.Transaction) error
 		UpdateTransactionById(id int, update model.Transaction) (error, bool)
 	}
 )
 
-func New(UserRepository, UserRepository, TransactionRepository, UserLimitRepository) (*Repository, error) {
+func New(UserRepository, UserDetailRepository, TransactionRepository, UserLimitRepository) (*Repository, error) {
 	return &Repository{}, nil
 }

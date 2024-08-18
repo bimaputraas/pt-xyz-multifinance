@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"sync"
 	"xyz-multifinance/internal/model"
 
 	"gorm.io/gorm"
@@ -92,11 +93,44 @@ func (r *mySqlRepo) CreateUserDetail(userDetail model.UserDetail) error {
 
 // transaction
 
-func (r *mySqlRepo) CreateTransaction(transaction model.Transaction) error {
-	if err := r.DB.Create(&transaction).Error; err != nil {
-		return fmt.Errorf("failed to create transaction: %w", err)
+func (r *mySqlRepo) CreateTransaction(userLimit model.UserLimit, transaction model.Transaction) error {
+	tx := r.DB.Begin()
+	if err := tx.Error; err != nil {
+		return err
 	}
-	return nil
+
+	errChan := make(chan error, 2)
+	wg := sync.WaitGroup{}
+
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		if err := tx.Create(&transaction).Error; err != nil {
+			errChan <- err
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		if err := tx.Model(&model.UserLimit{UserID: uint(userLimit.UserID)}).Updates(userLimit).Error; err != nil {
+			errChan <- err
+		}
+	}()
+
+	go func() {
+		wg.Wait()
+		close(errChan)
+	}()
+
+	for err := range errChan {
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit().Error
 }
 
 func (r *mySqlRepo) FindAllTransactions() ([]model.Transaction, error) {
