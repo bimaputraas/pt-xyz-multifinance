@@ -1,12 +1,13 @@
 package logic
 
 import (
+	"errors"
 	"xyz-multifinance/internal/repository"
 )
 
 type (
 	Logic struct {
-		repository.Repository
+		repo repository.Repository
 	}
 	Error interface {
 		Code() int
@@ -23,7 +24,7 @@ const (
 	InvalidArgument = 1
 	NotFound        = 2
 	Internal        = 3
-	Ilegal          = 4
+	Illegal         = 4
 )
 
 func New() (*Logic, error) {
@@ -31,7 +32,8 @@ func New() (*Logic, error) {
 }
 
 func ParseError(err error) (Error, bool) {
-	r, ok := err.(*errLogic)
+	var r *errLogic
+	ok := errors.As(err, &r)
 	if !ok {
 		return &errLogic{}, false
 	}
@@ -52,7 +54,7 @@ func ErrInternal(err error) error {
 }
 
 func ErrIllegal(err error) error {
-	return &errLogic{code: Internal, msg: err.Error()}
+	return &errLogic{code: Illegal, msg: err.Error()}
 }
 
 func (e *errLogic) Code() int {

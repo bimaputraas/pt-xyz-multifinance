@@ -2,12 +2,13 @@ package logic
 
 import (
 	"errors"
+	"gorm.io/gorm"
 	"os"
 	"xyz-multifinance/internal/model"
 	"xyz-multifinance/pkg"
 )
 
-func (logic Logic) AuthUser(token string) (*model.User, error) {
+func (logic *Logic) AuthUser(token string) (*model.User, error) {
 	if token == "" {
 		return &model.User{}, ErrIllegal(errors.New("no token"))
 	}
@@ -23,9 +24,9 @@ func (logic Logic) AuthUser(token string) (*model.User, error) {
 		return &model.User{}, ErrInternal(errors.New("failed assert"))
 	}
 
-	user, err, ok := logic.Repository.FindUserById(int(userId))
+	user, err := logic.repo.UserRepository.FindById(int(userId))
 
-	if !ok {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return &model.User{}, ErrNotFound(errors.New("user not found"))
 	}
 

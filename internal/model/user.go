@@ -37,10 +37,10 @@ type (
 	UserLimit struct {
 		ID        uint           `gorm:"primaryKey" json:"id,omitempty"`
 		UserID    uint           `gorm:"not null" json:"konsumen_id"`
-		Tenor1    float64        `json:"tenor_1"`
-		Tenor2    float64        `json:"tenor_2"`
-		Tenor3    float64        `json:"tenor_3"`
-		Tenor4    float64        `json:"tenor_4"`
+		Tenor1    float64        `json:"tenor_1" validate:"required"`
+		Tenor2    float64        `json:"tenor_2" validate:"required"`
+		Tenor3    float64        `json:"tenor_3" validate:"required"`
+		Tenor4    float64        `json:"tenor_4" validate:"required"`
 		CreatedAt time.Time      `json:"created_at,omitempty"`
 		UpdatedAt time.Time      `json:"updated_at,omitempty"`
 		DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
@@ -48,6 +48,15 @@ type (
 		UserDetail UserDetail `gorm:"foreignKey:UserID" json:"konsumen,omitempty"`
 	}
 )
+
+func (u *UserLimit) DefaultTenors(gaji float64) {
+	base := gaji * 0.4
+
+	u.Tenor1 = base
+	u.Tenor2 = base * 2
+	u.Tenor3 = base * 3
+	u.Tenor4 = base * 4
+}
 
 func (u *User) Reset() {
 	u = &User{}

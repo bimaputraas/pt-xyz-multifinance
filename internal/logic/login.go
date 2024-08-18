@@ -2,6 +2,7 @@ package logic
 
 import (
 	"errors"
+	"gorm.io/gorm"
 	"os"
 	"xyz-multifinance/internal/model"
 	"xyz-multifinance/pkg"
@@ -15,7 +16,7 @@ type (
 	}
 )
 
-func (logic Logic) Login(user model.User) (*JWT, error) {
+func (logic *Logic) Login(user model.User) (*JWT, error) {
 	var (
 		plain  string
 		hashed string
@@ -25,14 +26,14 @@ func (logic Logic) Login(user model.User) (*JWT, error) {
 	}
 	plain = user.Password
 
-	user, err, ok := logic.Repository.FindUserByEmail(user.Email)
+	user, err := logic.repo.UserRepository.FindByEmail(user.Email)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return &JWT{}, ErrInvalidArgument(errors.New("incorrect email or password"))
+	}
 
 	if err != nil {
 		return &JWT{}, ErrInternal(err)
-	}
-
-	if !ok {
-		return &JWT{}, ErrInvalidArgument(errors.New("incorrect email or password"))
 	}
 
 	hashed = user.Password

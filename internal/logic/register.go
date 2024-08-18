@@ -5,7 +5,7 @@ import (
 	"xyz-multifinance/pkg"
 )
 
-func (logic Logic) Register(user model.User) error {
+func (logic *Logic) Register(user model.User) error {
 	if err := pkg.ValidateStruct(user); err != nil {
 		return ErrInvalidArgument(err)
 	}
@@ -17,7 +17,7 @@ func (logic Logic) Register(user model.User) error {
 
 	user.Password = hashed
 
-	if err := logic.Repository.CreateUser(user); err != nil {
+	if err := logic.repo.UserRepository.Create(user); err != nil {
 		return ErrInternal(err)
 	}
 

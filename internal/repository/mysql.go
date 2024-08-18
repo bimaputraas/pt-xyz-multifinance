@@ -1,195 +1,109 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
-	"sync"
 	"xyz-multifinance/internal/model"
 
 	"gorm.io/gorm"
 )
 
-func UserMySQL(db *gorm.DB) UserRepository {
-	return &mySqlRepo{
-		DB: db,
+type (
+	userMySql struct {
+		*gorm.DB
 	}
-}
-func UserDetailMySQL(db *gorm.DB) UserDetailRepository {
-	return &mySqlRepo{
-		DB: db,
+	userDetailMySql struct {
+		*gorm.DB
 	}
-}
-func TransactionMySQL(db *gorm.DB) TransactionRepository {
-	return &mySqlRepo{
-		DB: db,
+	transactionMySql struct {
+		*gorm.DB
 	}
-}
-func UserLimitMySQL(db *gorm.DB) UserLimitRepository {
-	return &mySqlRepo{
-		DB: db,
+	userLimitMySql struct {
+		*gorm.DB
 	}
-}
-
-type mySqlRepo struct {
-	*gorm.DB
-}
+)
 
 // user
 
-func (r *mySqlRepo) CreateUser(user model.User) error {
-	if err := r.DB.Create(&user).Error; err != nil {
+func (r *userMySql) Create(data model.User) error {
+	if err := r.DB.Create(&data).Error; err != nil {
 		return fmt.Errorf("failed to create user: %w", err)
 	}
 	return nil
 }
 
-func (r *mySqlRepo) FindAllUsers() ([]model.User, error) {
-	var users []model.User
-	if err := r.DB.Find(&users).Error; err != nil {
-		return nil, fmt.Errorf("failed to find users: %w", err)
-	}
-	return users, nil
-}
-
-func (r *mySqlRepo) FindUserById(id int) (model.User, error, bool) {
+func (r *userMySql) FindById(id int) (model.User, error) {
 	var user model.User
 	if err := r.DB.First(&user, id).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return user, nil, false
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return user, ErrNotFound(err)
 		}
-		return user, fmt.Errorf("failed to find user by id: %w", err), false
+		return user, err
 	}
-	return user, nil, true
+	return user, nil
 }
-func (r *mySqlRepo) FindUserByEmail(email string) (model.User, error, bool) {
+func (r *userMySql) FindByEmail(email string) (model.User, error) {
 	var user model.User
 	if err := r.DB.First(&user, email).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return user, nil, false
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return user, ErrNotFound(err)
 		}
-		return user, fmt.Errorf("failed to find user by id: %w", err), false
+		return user, err
 	}
-	return user, nil, true
+	return user, nil
 }
 
 // user detail
 
-func (r *mySqlRepo) FindUserDetailByUId(userId int) (model.UserDetail, error, bool) {
+func (r *userDetailMySql) FindByUserId(userId int) (model.UserDetail, error) {
 	var user model.UserDetail
 	if err := r.DB.First(&user, model.UserDetail{UserID: uint(userId)}).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return user, nil, false
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return user, ErrNotFound(err)
 		}
-		return user, fmt.Errorf("failed to find user detail: %w", err), false
+		return user, err
 	}
-	return user, nil, true
+	return user, nil
 }
 
-func (r *mySqlRepo) CreateUserDetail(userDetail model.UserDetail) error {
-	if err := r.DB.Create(&userDetail).Error; err != nil {
-		return fmt.Errorf("failed to create userDetail: %w", err)
-	}
-	return nil
+func (r *userDetailMySql) CreateWithTx(dbTx DBTx, data model.UserDetail) (DBTx, error) {
+	err := dbTx.gorm().Create(&data).Error
+	return dbTx, err
 }
 
 // transaction
 
-func (r *mySqlRepo) CreateTransaction(userLimit model.UserLimit, transaction model.Transaction) error {
-	tx := r.DB.Begin()
-	if err := tx.Error; err != nil {
-		return err
-	}
-
-	errChan := make(chan error, 2)
-	wg := sync.WaitGroup{}
-
-	wg.Add(2)
-
-	go func() {
-		defer wg.Done()
-		if err := tx.Create(&transaction).Error; err != nil {
-			errChan <- err
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-		if err := tx.Model(&model.UserLimit{UserID: uint(userLimit.UserID)}).Updates(userLimit).Error; err != nil {
-			errChan <- err
-		}
-	}()
-
-	go func() {
-		wg.Wait()
-		close(errChan)
-	}()
-
-	for err := range errChan {
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-
-	return tx.Commit().Error
-}
-
-func (r *mySqlRepo) FindAllTransactions() ([]model.Transaction, error) {
-	var transactions []model.Transaction
-	if err := r.DB.Find(&transactions).Error; err != nil {
-		return nil, fmt.Errorf("failed to find transactions: %w", err)
-	}
-	return transactions, nil
-}
-
-func (r *mySqlRepo) FindTransactionById(id int) (model.Transaction, error, bool) {
-	var transaction model.Transaction
-	if err := r.DB.First(&transaction, id).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return transaction, nil, false
-		}
-		return transaction, fmt.Errorf("failed to find transaction by id: %w", err), false
-	}
-	return transaction, nil, true
-}
-
-func (r *mySqlRepo) UpdateTransactionById(id int, update model.Transaction) (error, bool) {
-	if err := r.DB.Model(&model.Transaction{ID: uint(id)}).Updates(update).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, false
-		}
-		return fmt.Errorf("failed to update transaction: %w", err), false
-	}
-	return nil, true
+func (r *transactionMySql) CreateWithTx(dbTx DBTx, data model.Transaction) (DBTx, error) {
+	err := dbTx.gorm().Create(&data).Error
+	return dbTx, err
 }
 
 // user limit
 
-func (r *mySqlRepo) CreateUserLimit(userLimit model.UserLimit) error {
-	if err := r.DB.Create(&userLimit).Error; err != nil {
-		return fmt.Errorf("failed to create userLimit: %w", err)
-	}
-	return nil
+func (r *userLimitMySql) CreateWithTx(dbTx DBTx, data model.UserLimit) (DBTx, error) {
+	err := dbTx.gorm().Create(&data).Error
+	return dbTx, err
 }
 
-func (r *mySqlRepo) FindUserLimitByUId(userId int) (model.UserLimit, error, bool) {
+func (r *userLimitMySql) FindByUserId(userId int) (model.UserLimit, error) {
 	var userLimit model.UserLimit
 	if err := r.DB.First(&userLimit, model.UserLimit{
 		UserID: uint(userId),
 	}).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return userLimit, nil, false
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return userLimit, ErrNotFound(err)
 		}
-		return userLimit, fmt.Errorf("failed to find userLimit by id: %w", err), false
+		return userLimit, err
 	}
-	return userLimit, nil, true
+	return userLimit, nil
 }
 
-func (r *mySqlRepo) UpdateUserLimitByUId(userId int, update model.UserLimit) (error, bool) {
-	if err := r.DB.Model(&model.UserLimit{ID: uint(userId)}).Updates(update).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, false
+func (r *userLimitMySql) UpdateWithTx(dbTx DBTx, data model.UserLimit) (DBTx, error) {
+	if err := dbTx.gorm().Model(&model.UserLimit{ID: data.UserID}).Updates(data).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return dbTx, ErrNotFound(err)
 		}
-		return fmt.Errorf("failed to update userLimit: %w", err), false
+		return dbTx, err
 	}
-	return nil, true
+	return dbTx, nil
 }
