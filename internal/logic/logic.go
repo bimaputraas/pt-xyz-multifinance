@@ -7,7 +7,7 @@ import (
 
 type (
 	Logic struct {
-		repo repository.Repository
+		repo *repository.Repository
 	}
 	Error interface {
 		Code() int
@@ -27,8 +27,10 @@ const (
 	Illegal         = 4
 )
 
-func New() (*Logic, error) {
-	return &Logic{}, nil
+func New(repo *repository.Repository) (*Logic, error) {
+	return &Logic{
+		repo: repo,
+	}, nil
 }
 
 func ParseError(err error) (Error, bool) {

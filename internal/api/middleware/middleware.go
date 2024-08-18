@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"net/http"
 	"time"
+	"xyz-multifinance/internal/logic"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -9,11 +11,14 @@ import (
 
 type (
 	Middleware struct {
+		logic *logic.Logic
 	}
 )
 
-func New() *Middleware {
-	return &Middleware{}
+func New(logic *logic.Logic) *Middleware {
+	return &Middleware{
+		logic: logic,
+	}
 }
 
 func (m Middleware) Cors() gin.HandlerFunc {
@@ -28,4 +33,31 @@ func (m Middleware) Cors() gin.HandlerFunc {
 		},
 		MaxAge: 12 * time.Hour,
 	})
+}
+
+func (m Middleware) Auth() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		token := ctx.GetHeader("Authorization")
+		if token == "" {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Unauthorized",
+				"details": "no token",
+				"code":    401,
+			})
+			return
+		}
+
+		user, err := m.logic.AuthUser(token)
+		if err != nil {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Unauthorized",
+				"details": err.Error(),
+				"code":    401,
+			})
+			return
+		}
+
+		ctx.Set("user", user)
+		ctx.Next()
+	}
 }

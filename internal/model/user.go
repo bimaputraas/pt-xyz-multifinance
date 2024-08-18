@@ -29,7 +29,6 @@ type (
 		Gaji         float64        `gorm:"not null" json:"gaji" validate:"required"`
 		FotoKTP      string         `gorm:"not null" json:"foto_ktp" validate:"required"`
 		FotoSelfie   string         `gorm:"not null" json:"foto_selfie" validate:"required"`
-		IsVerified   bool           `json:"omitempty"`
 		User         User           `gorm:"references:ID"`
 		UserID       uint           `gorm:"not null" json:"user_id"`
 	}

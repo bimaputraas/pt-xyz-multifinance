@@ -9,15 +9,17 @@ import (
 
 type (
 	Controller struct {
-		logic logic.Logic
+		logic *logic.Logic
 	}
 )
 
-func New() (*Controller, error) {
-	return &Controller{}, nil
+func New(logic *logic.Logic) (*Controller, error) {
+	return &Controller{
+		logic: logic,
+	}, nil
 }
 
-func (ctr *Controller) Register(ctx gin.Context) {
+func (ctr *Controller) Register(ctx *gin.Context) {
 	var (
 		payload = model.User{}
 	)
@@ -38,7 +40,7 @@ func (ctr *Controller) Register(ctx gin.Context) {
 	})
 }
 
-func (ctr *Controller) Login(ctx gin.Context) {
+func (ctr *Controller) Login(ctx *gin.Context) {
 	var (
 		payload = model.User{}
 	)
@@ -61,10 +63,10 @@ func (ctr *Controller) Login(ctx gin.Context) {
 	})
 }
 
-func (ctr *Controller) RegisterInstallment(ctx gin.Context) {
+func (ctr *Controller) RegisterInstallment(ctx *gin.Context) {
 	var (
 		payload    = model.UserDetail{}
-		userAny, _ = ctx.Get("user_id")
+		userAny, _ = ctx.Get("user")
 	)
 
 	user, ok := userAny.(model.User)
@@ -94,10 +96,10 @@ func (ctr *Controller) RegisterInstallment(ctx gin.Context) {
 	})
 }
 
-func (ctr *Controller) NewTransaction(ctx gin.Context) {
+func (ctr *Controller) NewTransaction(ctx *gin.Context) {
 	var (
 		payload    = model.Transaction{}
-		userAny, _ = ctx.Get("user_id")
+		userAny, _ = ctx.Get("user")
 	)
 
 	user, ok := userAny.(model.User)
