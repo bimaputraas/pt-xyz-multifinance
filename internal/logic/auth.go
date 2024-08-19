@@ -3,7 +3,6 @@ package logic
 import (
 	"errors"
 	"gorm.io/gorm"
-	"os"
 	"xyz-multifinance/internal/model"
 	"xyz-multifinance/pkg"
 )
@@ -13,10 +12,10 @@ func (logic *Logic) AuthUser(token string) (*model.User, error) {
 		return &model.User{}, ErrIllegal(errors.New("no token"))
 	}
 
-	secret := []byte(os.Getenv("JWT_SECRET"))
+	secret := []byte(logic.config.JWTSecret)
 	claims, err := pkg.ParseJWT(token, secret)
 	if err != nil {
-		return &model.User{}, ErrIllegal(errors.New("unauthorized"))
+		return &model.User{}, ErrIllegal(errors.New("invalid token"))
 	}
 
 	userId, ok := claims["user_id"].(float64)

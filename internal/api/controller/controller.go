@@ -69,7 +69,7 @@ func (ctr *Controller) RegisterInstallment(ctx *gin.Context) {
 		userAny, _ = ctx.Get("user")
 	)
 
-	user, ok := userAny.(model.User)
+	user, ok := userAny.(*model.User)
 	if !ok {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "Unauthorized",
@@ -102,7 +102,7 @@ func (ctr *Controller) NewTransaction(ctx *gin.Context) {
 		userAny, _ = ctx.Get("user")
 	)
 
-	user, ok := userAny.(model.User)
+	user, ok := userAny.(*model.User)
 	if !ok {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "Unauthorized",

@@ -2,12 +2,14 @@ package logic
 
 import (
 	"errors"
+	"xyz-multifinance/internal/config"
 	"xyz-multifinance/internal/repository"
 )
 
 type (
 	Logic struct {
-		repo *repository.Repository
+		repo   *repository.Repository
+		config *config.Config
 	}
 	Error interface {
 		Code() int
@@ -27,9 +29,10 @@ const (
 	Illegal         = 4
 )
 
-func New(repo *repository.Repository) (*Logic, error) {
+func New(repo *repository.Repository, config *config.Config) (*Logic, error) {
 	return &Logic{
-		repo: repo,
+		repo:   repo,
+		config: config,
 	}, nil
 }
 

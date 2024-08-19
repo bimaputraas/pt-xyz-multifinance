@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -21,7 +22,7 @@ func ValidateStruct(obj interface{}) error {
 			case "email":
 				return errors.New("invalid email")
 			case "required":
-				return errors.New(err.Field() + "is required")
+				return errors.New(strings.ToLower(err.Field()) + " is required")
 			default:
 				return errors.New("invalid " + err.Field())
 			}

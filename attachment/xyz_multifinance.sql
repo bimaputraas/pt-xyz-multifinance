@@ -19,68 +19,60 @@
 
 
 CREATE TABLE `transactions` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `deleted_at` datetime DEFAULT NULL,
-  `nomor_kontrak` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `otr` decimal(15,2) NOT NULL,
-  `admin_fee` decimal(15,2) NOT NULL,
-  `tenor` int NOT NULL,
-  `jumlah_cicilan` decimal(15,2) NOT NULL,
-  `jumlah_bunga` decimal(15,2) NOT NULL,
-  `nama_asset` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `user_id` bigint unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `nomor_kontrak` (`nomor_kontrak`),
-  KEY `user_id` (`user_id`),
-  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `userDetails` (`id`)
+                                `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+                                `datetime` datetime DEFAULT CURRENT_TIMESTAMP,
+                                `nomor_kontrak` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `otr` decimal(15,2) NOT NULL,
+                                `admin_fee` decimal(15,2) NOT NULL,
+                                `tenor` int NOT NULL,
+                                `jumlah_cicilan` decimal(15,2) NOT NULL,
+                                `jumlah_bunga` decimal(15,2) NOT NULL,
+                                `nama_asset` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `user_id` bigint unsigned NOT NULL,
+                                PRIMARY KEY (`id`),
+                                UNIQUE KEY `nomor_kontrak` (`nomor_kontrak`),
+                                KEY `user_id` (`user_id`),
+                                FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE `userDetails` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `deleted_at` datetime DEFAULT NULL,
-  `nik` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `full_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `legal_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tempat_lahir` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tanggal_lahir` date NOT NULL,
-  `gaji` decimal(15,2) NOT NULL,
-  `foto_ktp` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `foto_selfie` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `user_id` bigint unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `nik` (`nik`),
-  KEY `user_id` (`user_id`),
-  CONSTRAINT `userDetails_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+CREATE TABLE `user_details` (
+                                `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+                                `datetime` datetime DEFAULT CURRENT_TIMESTAMP,
+                                `nik` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `full_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `legal_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `tempat_lahir` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `tanggal_lahir` date NOT NULL,
+                                `gaji` decimal(15,2) NOT NULL,
+                                `foto_ktp` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `foto_selfie` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `user_id` bigint unsigned NOT NULL,
+                                PRIMARY KEY (`id`),
+                                UNIQUE KEY `nik` (`nik`),
+                                KEY `user_id` (`user_id`),
+                                FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE `userLimits` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint unsigned NOT NULL,
-  `tenor_1` decimal(15,2) NOT NULL,
-  `tenor_2` decimal(15,2) NOT NULL,
-  `tenor_3` decimal(15,2) NOT NULL,
-  `tenor_4` decimal(15,2) NOT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `deleted_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`),
-  CONSTRAINT `userLimits_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `userDetails` (`id`)
+CREATE TABLE `user_limits` (
+                               `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+                               `user_id` bigint unsigned NOT NULL,
+                               `tenor_1` decimal(15,2) NOT NULL,
+                               `tenor_2` decimal(15,2) NOT NULL,
+                               `tenor_3` decimal(15,2) NOT NULL,
+                               `tenor_4` decimal(15,2) NOT NULL,
+                               `datetime` datetime DEFAULT CURRENT_TIMESTAMP,
+                               PRIMARY KEY (`id`),
+                               KEY `user_id` (`user_id`),
+                               FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `users` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `deleted_at` datetime DEFAULT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
+                         `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+                         `datetime` datetime DEFAULT CURRENT_TIMESTAMP,
+                         `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                         `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                         PRIMARY KEY (`id`),
+                         UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 

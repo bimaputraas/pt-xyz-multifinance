@@ -3,7 +3,6 @@ package logic
 import (
 	"errors"
 	"gorm.io/gorm"
-	"os"
 	"xyz-multifinance/internal/model"
 	"xyz-multifinance/pkg"
 
@@ -42,7 +41,7 @@ func (logic *Logic) Login(user model.User) (*JWT, error) {
 		return &JWT{}, ErrInvalidArgument(errors.New("incorrect email or password"))
 	}
 
-	secret := []byte(os.Getenv("JWT_SECRET"))
+	secret := []byte(logic.config.JWTSecret)
 	token, err := pkg.GenerateJWT(jwt.MapClaims{"user_id": user.ID}, secret)
 	if err != nil {
 		return &JWT{}, ErrInternal(err)

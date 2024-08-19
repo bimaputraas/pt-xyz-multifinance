@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"errors"
 	"fmt"
 	"xyz-multifinance/internal/model"
 
@@ -35,19 +34,15 @@ func (r *userMySql) Create(data model.User) error {
 func (r *userMySql) FindById(id int) (model.User, error) {
 	var user model.User
 	if err := r.DB.First(&user, id).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return user, ErrNotFound(err)
-		}
+
 		return user, err
 	}
 	return user, nil
 }
 func (r *userMySql) FindByEmail(email string) (model.User, error) {
 	var user model.User
-	if err := r.DB.First(&user, email).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return user, ErrNotFound(err)
-		}
+	if err := r.DB.First(&user, model.User{Email: email}).Error; err != nil {
+
 		return user, err
 	}
 	return user, nil
@@ -58,9 +53,7 @@ func (r *userMySql) FindByEmail(email string) (model.User, error) {
 func (r *userDetailMySql) FindByUserId(userId int) (model.UserDetail, error) {
 	var user model.UserDetail
 	if err := r.DB.First(&user, model.UserDetail{UserID: uint(userId)}).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return user, ErrNotFound(err)
-		}
+
 		return user, err
 	}
 	return user, nil
@@ -90,20 +83,16 @@ func (r *userLimitMySql) FindByUserId(userId int) (model.UserLimit, error) {
 	if err := r.DB.First(&userLimit, model.UserLimit{
 		UserID: uint(userId),
 	}).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return userLimit, ErrNotFound(err)
-		}
+
 		return userLimit, err
 	}
 	return userLimit, nil
 }
 
 func (r *userLimitMySql) UpdateWithTx(dbTx DBTx, data model.UserLimit) (DBTx, error) {
-	if err := dbTx.gorm().Model(&model.UserLimit{ID: data.UserID}).Updates(data).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return dbTx, ErrNotFound(err)
-		}
+	if err := dbTx.gorm().Save(&data).Error; err != nil {
 		return dbTx, err
 	}
+
 	return dbTx, nil
 }

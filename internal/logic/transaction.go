@@ -17,8 +17,9 @@ const (
 
 func (logic *Logic) NewTransaction(userId int, data model.Transaction) error {
 	var (
-		errChan = make(chan error, 2)
-		wg      = sync.WaitGroup{}
+		errs  = []error{}
+		wg    = sync.WaitGroup{}
+		mutex = sync.Mutex{}
 	)
 	if err := pkg.ValidateStruct(data); err != nil {
 		return ErrInvalidArgument(err)
@@ -59,28 +60,38 @@ func (logic *Logic) NewTransaction(userId int, data model.Transaction) error {
 
 	go func() {
 		defer wg.Done()
+		transaction.UserID = uint(userId)
+		transaction.Datetime = time.Now().Format("2006-01-02 15:04:05")
 		tx, err = logic.repo.TransactionRepository.CreateWithTx(tx, transaction)
 		if err != nil {
-			errChan <- err
+			mutex.Lock()
+			errs = append(errs, ErrInternal(err))
+			mutex.Unlock()
+			return
 		}
 	}()
 
-	updateUserLimitAmount(&userLimit, transaction.JumlahCicilan)
-
 	go func() {
 		defer wg.Done()
+		if err := updateUserLimitAmount(&userLimit, transaction.JumlahCicilan); err != nil {
+			mutex.Lock()
+			errs = append(errs, ErrInvalidArgument(err))
+			mutex.Unlock()
+			return
+		}
+		userLimit.UserID = uint(userId)
 		tx, err = logic.repo.UserLimitRepository.UpdateWithTx(tx, userLimit)
 		if err != nil {
-			errChan <- err
+			mutex.Lock()
+			errs = append(errs, ErrInternal(err))
+			mutex.Unlock()
 		}
 	}()
 
 	wg.Wait()
-	for err := range errChan {
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
+	if len(errs) > 0 {
+		tx.Rollback()
+		return ErrInternal(errs[0])
 	}
 
 	tx.Commit()
@@ -97,10 +108,14 @@ func calcJumlahCicilan(tenor int, otr float64) float64 {
 	return monthly * float64(tenor)
 }
 
-func updateUserLimitAmount(user *model.UserLimit, jumlahCicilan float64) {
+func updateUserLimitAmount(user *model.UserLimit, jumlahCicilan float64) error {
 	limitAmount := user.Tenor4 - jumlahCicilan
+	if limitAmount < 0 {
+		return errors.New("not enough limit")
+	}
 	user.Tenor1 = limitAmount * 0.25
 	user.Tenor2 = limitAmount * 0.5
 	user.Tenor3 = limitAmount * 0.75
 	user.Tenor4 = limitAmount
+	return nil
 }
